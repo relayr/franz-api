@@ -3,7 +3,7 @@ window.onload = function() {
 
   // the following lines will be replaced by docker/configurator, when it runs in a docker-container
   window.ui = SwaggerUIBundle({
-    url: "https://franz-api.relayr.io/swagger.yaml",
+    url: "https://relayr.github.io/franz-api/", 
     dom_id: '#swagger-ui',
     deepLinking: true,
     presets: [
