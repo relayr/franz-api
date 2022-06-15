@@ -1,0 +1,21 @@
+# IDE files
+.idea
+.vscode/
+
+.DS_Store
+
+node_modules/
+bin/
+lib/
+lib64
+include/
+pip-selfcheck.json
+*.swp
+pyvenv.cfg
+swaggers/
+output.html
+table.html
+swagger.html
+/index.html
+data.json
+
