@@ -19,6 +19,8 @@ info:
 paths:
   /oauth/token:
     post:
+      tags:
+        - Auth API
       summary: Acquire a bearer token
       description:
         Acquires an access token by username and a password. Access tokens are valid for 100 minutes. 
@@ -56,6 +58,8 @@ paths:
 
   /franz/elevators/{elevatorId}/kpis/daily:
     get:
+      tags:
+        - Franz API
       summary: Returns daily aggregations of a specified KPI
       security:
         - Bearer: []
