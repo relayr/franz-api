@@ -2,29 +2,29 @@ openapi: 3.0.1
 
 servers:
   - url: 'https://cloud.prd.az.relayr.io/'
-    description: API URL for the KPI retrieval
+    description: KPI retrieval API
   - url: 'https://login.prd.az.relayr.io/'
-    description: API URL for the Authentication
+    description: Auth API
 
 info:
   version: 1.0.0
   title: Franz API
-  description: >-
-    An API for external customers to export the KPI data of the elevators.
-    The report endpoint should enable the user to export one KPI of the selected elevator over the specified time-range. 
-    As a result, detailed report for a single elevator with daily bucket aggregations will be returned in JSON format.
-    The API requires authentication by a bearer token, which has to be acquired by invoking `/oauth/token` endpoint 
-    whilst having username and a password. Enter API token by pressing the lock button on the KPI retrieval endpoint afterwards.
+  description: "Franz API enables you to export elevator KPI data. You can request data for one KPI per elevator over the specified timeframe. Franz API will then return a JSON file that details the requested data. 
+  
+    
+  __To start using Franz API:__  
+  
+  1. Request a bearer (access) token from the `/oauth/token` endpoint using your username and password. Note that the token is active for 100 minutes.
+  
+  2. Select __Authorize__ and enter the received bearer token."
 
 paths:
   /oauth/token:
     post:
-      tags:
-        - Auth API
-      summary: Acquire a bearer token
+      tags: [Franz API]
+      summary: Receive a bearer token
       description:
-        Acquires an access token by username and a password. Access tokens are valid for 100 minutes. 
-        Use `API URL for the Authentication` server here.
+        Returns an authentication token based on your username and password. The token is valid for 100 minutes. Use the `Auth API` server.
       parameters:
         - $ref: '#/components/parameters/QueryClientId'
       requestBody:
@@ -37,68 +37,65 @@ paths:
                   example: user@example.com
                   type: string
                 password:
-                  example: IContainLettersAndNumbers1
+                  example: LettersAndNumbers1
                   type: string
               required:
                 - username
                 - password
       responses:
         '200':
-          description: The new access token
+          description: The bearer token returned successfully.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccessToken'
         '400':
-          description: Invalid client_id or missing parameters
+          description: The specified `client_id` is invalid, or some parameters are missing.
         '401':
-          description: The credentials provided are invalid
+          description: The provided credentials are invalid.
         'default':
           $ref: '#/components/responses/defaultError'
 
   /franz/elevators/{elevatorId}/kpis/daily:
     get:
-      tags:
-        - Franz API
-      summary: Returns daily aggregations of a specified KPI
+      tags: [Franz API]
+      summary: Retrieve the aggregated elevator KPI data for the specified timeframe
       security:
         - Bearer: []
       parameters:
         - name: elevatorId
           in: path
           required: true
+          description: "ID of the necessary elevator."
           schema:
             $ref: '#/components/schemas/elevatorId'
         - name: kpi
           in: query
           required: true
+          description: "Elevator KPI for which you want to retrieve data."
           schema:
             $ref: '#/components/schemas/kpi'
         - name: startDate
           in: query
           required: true
-          description: >-
-            The beginning of the time interval (inclusive) from which the raw measurements will be
-            returned. Use `API URL for the KPI retrieval` server here.
+          description: "Start of the timeframe for which you want to return the raw elevator KPI data. Inclusive. Use the `KPI retrieval API` server."
           schema:
             $ref: '#/components/schemas/date'
         - name: endDate
           in: query
           required: true
-          description: >-
-            The end of the time interval (inclusive) from which the raw measurements will be
-            returned
+          description: "End of the timeframe for which you want to return the raw KPI data. Inclusive."
           schema:
             $ref: '#/components/schemas/date'
       responses:
         '200':
-          description: Kpi successfully retrieved
+          description: "The elevator KPI data retrieved successfully."
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/kpiData'
         '409':
-          description: Elevator location information missing
+          description: "Information about the elevator location is missing."
         'default':
           $ref: '#/components/responses/defaultError'
 
@@ -113,7 +110,7 @@ components:
       name: client_id
       in: query
       required: true
-      description: Type of the API user. Use `api-client`
+      description: "Specifies the API user type. Use `api-client` by default."
       example: api-client
       schema:
         type: string
@@ -121,7 +118,7 @@ components:
 
   responses:
     defaultError:
-      description: Error response with error message
+      description: "Something went wrong."
       content:
         application/json:
           schema:
@@ -139,36 +136,24 @@ components:
         accessToken:
           type: string
           example: 070b35231966488ab07f11822c6ef162
-          description: Access token that's only valid for a certain timeframe specified on the expiresIn parameter.
+          description: "The bearer token used for authorization. Valid for the duration specified in the `expiresIn` parameter."
         tokenType:
           type: string
           example: Bearer
-          description: The type of the token, currently always "Bearer"
+          description: "Auth token type, currently set to `Bearer` at all times."
         refreshToken:
           type: string
           example: cd98b3dea6044470b0a6dfccc0e370ee-r
-          description: The refresh token which can be used to get a new access token.
+          description: "A refresh token that you can use to get a new bearer token."
         expiresIn:
           type: integer
           example: 43199
-          description: The validity of the access token in seconds starting from the issuing time.
-    elevator:
-      type: string
-      description: Case-insensitive, NO wildcards. The ID of the elevator
-      example: 03a9599c-9ee4-11e7-b5ec-c75f7ba9a53d
-      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+          description: "Time, during which the bearer token is valid after being issued. Specified in seconds."
     elevatorId:
-      description: Elevator Id
+      description: "ID of the elevator"
       type: string
       example: 'abcdefgh1@mwec23452#@$12'
       maxLength: 64
-    elevators:
-      type: array
-      description: Ids of the elevators
-      minItems: 1
-      maxItems: 50
-      items:
-        $ref: '#/components/schemas/elevator'
     Error:
       type: object
       required:
@@ -188,7 +173,7 @@ components:
             - message
           example:
             message: Error message
-            details: Additional details about the error - if applicable
+            details: If applicable, specifies additional details about the error.
             id: 113faaa1-6165-4439-93b8-ecfb8febc023
     kpi:
       type: string
@@ -200,7 +185,7 @@ components:
         - distanceTraveledSum
         - tripsCount
     kpiData:
-      description: Data and the metadata of the retrieved KPI
+      description: The data and metadata for the requested elevator KPI.
       type: object
       required:
         - data
@@ -211,7 +196,7 @@ components:
         metadata:
           $ref: '#/components/schemas/metadata'
     measurementValues:
-      description: Aggregated values of the KPI for each date
+      description: Data for the requested elevator KPI aggregated over the specified timeframe.
       type: array
       items:
         type: object
@@ -235,9 +220,3 @@ components:
             Shorthand notation, e.g. 'km', 'mi', 's'
             Unitless values are indicated with an empty string (e.g a count).
           example: 'mi'
-    reportName:
-      type: string
-      description: Name of the report without the extension
-      example: 'Super_awesome_report'
-      minLength: 3
-      maxLength: 100
